@@ -1,0 +1,2 @@
+//rootProject.name = 'customPlugin'
+include 'semver-git'
