@@ -22,6 +22,7 @@ In your `build.gradle` file:
         }
     }
     apply plugin 'cinnober-java'
+    group = 'com.cinnober' // or something similar
 
 Then everything should just work as usual with the java, maven and eclipse plugins.
 

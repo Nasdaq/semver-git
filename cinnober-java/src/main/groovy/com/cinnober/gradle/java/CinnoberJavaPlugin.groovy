@@ -51,6 +51,6 @@ class CinnoberJavaPlugin implements Plugin<Project> {
         project.artifacts { 
             archives project.tasks.sourcesJar
             archives project.tasks.javadocJar
-        } 
+        }
     }
 }
