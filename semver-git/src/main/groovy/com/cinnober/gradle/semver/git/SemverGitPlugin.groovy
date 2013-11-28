@@ -77,8 +77,11 @@ class SemverGitPlugin implements Plugin<Project> {
             nextVersion = project.ext.nextVersion
         }
         project.version = getGitVersion(nextVersion)
-        project.task('showVersion') << {
-            description "Show project.version"
+        project.task('showVersion') {
+            group = 'Help'
+            description = 'Show the project version'
+        }
+        project.tasks.showVersion << {
             println "Version: " + project.version
         }
     }

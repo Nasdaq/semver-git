@@ -3,7 +3,7 @@
 The gradle plugin 'semver-git' sets the `project.version` based on _annotated_ git tags.
 Version numbers must follow [Semantic Versioning 2.0.0](http://semver.org/spec/v2.0.0.html), with the syntax _major.minor.patch_.
 
-# Usage #
+## Usage ##
 
 In your `build.gradle` file:
 
