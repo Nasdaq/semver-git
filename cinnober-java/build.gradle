@@ -16,12 +16,17 @@ dependencies {
 }
 
 group = 'com.cinnober.gradle'
-version = '0.1.0-SNAPSHOT'
+version = '1.0.0-SNAPSHOT'
 
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: "http://nexus.cinnober.com/nexus/content/repositories/buildtest_snapshots/")
+            repository(url: "http://nexus.cinnober.com/nexus/content/repositories/releases/") {
+                authentication(userName: mavenUser, password: mavenPassword)
+            }
+            snapshotRepository(url: "http://nexus.cinnober.com/nexus/content/repositories/snapshots/") {
+                authentication(userName: mavenUser, password: mavenPassword)
+            }
         }
     }
 }

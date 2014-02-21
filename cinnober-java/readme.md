@@ -11,14 +11,14 @@ In your `build.gradle` file:
     buildscript {
         repositories {
             maven {
-                url uri("http://nexus.cinnober.com/nexus/content/repositories/buildtest_snapshots/")
+                url uri("http://nexus.cinnober.com/nexus/content/repositories/snapshots/")
             }
             maven {
-                url uri("http://nexus.cinnober.com/nexus/content/repositories/buildtest_releases/")
+                url uri("http://nexus.cinnober.com/nexus/content/repositories/releases/")
             }
         }
         dependencies {
-            classpath group: 'com.cinnober.gradle', name: 'cinnober-java', version: '0.1.0-SNAPSHOT'
+            classpath group: 'com.cinnober.gradle', name: 'cinnober-java', version: '1.0.0'
         }
     }
     apply plugin 'cinnober-java'
@@ -30,4 +30,11 @@ If you think it takes to long to generate javadoc all the time, the 'javadocJar'
 be excluded in your build:
 
     gradle -x javadocJar clean build
+
+To upload artifacts the properties `mavenUser` and `mavenPassword` needs to be set,
+for example in ~/.gradle/gradle.properties
+
+    mavenUser=your.username
+    mavenPassword=secret
+
 

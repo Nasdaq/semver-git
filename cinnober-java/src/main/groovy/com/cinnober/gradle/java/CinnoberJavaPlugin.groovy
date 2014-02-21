@@ -8,6 +8,8 @@ import org.gradle.api.tasks.compile.Compile
 class CinnoberJavaPlugin implements Plugin<Project> {
 
     void apply(Project project) {
+        // PENDING: move plugin maven, project.repositories and project.uploadArchives to separate plugin 'cinnober-nexus'
+        // then simply apply plugin 'cinnober-nexus' from here
         project.apply plugin: 'maven'
         project.apply plugin: 'java'
         project.apply plugin: 'eclipse'
@@ -27,8 +29,12 @@ class CinnoberJavaPlugin implements Plugin<Project> {
         project.uploadArchives {
             repositories {
                 mavenDeployer {
-                    repository(url: "http://nexus.cinnober.com/nexus/content/repositories/buildtest_releases/")
-                    snapshotRepository(url: "http://nexus.cinnober.com/nexus/content/repositories/buildtest_snapshots/")
+                    repository(url: "http://nexus.cinnober.com/nexus/content/repositories/releases/") {
+                        authentication(userName: mavenUser, password: mavenPassword)
+                    }
+                    snapshotRepository(url: "http://nexus.cinnober.com/nexus/content/repositories/snapshots/") {
+                        authentication(userName: mavenUser, password: mavenPassword)
+                    }
                 }
             }
         }

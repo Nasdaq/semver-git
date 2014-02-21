@@ -10,14 +10,14 @@ In your `build.gradle` file:
     buildscript {
         repositories {
             maven {
-                url uri("http://nexus.cinnober.com/nexus/content/repositories/buildtest_snapshots/")
+                url uri("http://nexus.cinnober.com/nexus/content/repositories/snapshots/")
             }
             maven {
-                url uri("http://nexus.cinnober.com/nexus/content/repositories/buildtest_releases/")
+                url uri("http://nexus.cinnober.com/nexus/content/repositories/releases/")
             }
         }
         dependencies {
-            classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '0.1.0-SNAPSHOT'
+            classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '1.0.0'
         }
     }
     // optionally: ext.nextVersion = "major", "minor" (default), "patch" or e.g. "3.0.0-rc2"
