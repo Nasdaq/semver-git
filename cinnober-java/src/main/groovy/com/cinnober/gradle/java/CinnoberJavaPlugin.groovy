@@ -21,7 +21,7 @@ class CinnoberJavaPlugin implements Plugin<Project> {
             }
         }
         def mavenUser = project.hasProperty('mavenUser') ? project.property('mavenUser') : null;
-        def mavenPassword = project.hasProperty('mavenUser') ? project.property('mavenPassword') : null;
+        def mavenPassword = project.hasProperty('mavenPassword') ? project.property('mavenPassword') : null;
         project.uploadArchives {
             repositories {
                 mavenDeployer {
