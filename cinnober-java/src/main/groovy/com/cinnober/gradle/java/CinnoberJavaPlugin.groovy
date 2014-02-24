@@ -20,6 +20,14 @@ class CinnoberJavaPlugin implements Plugin<Project> {
                 url "http://nexus.cinnober.com/nexus/content/groups/public/"
             }
         }
+        def mavenUser = null;
+        if (project.hasProperty('mavenUser')) {
+            mavenUser = project.property('mavenUser');
+        }
+        def mavenPassword = null;
+        if (project.hasProperty('mavenUser')) {
+            mavenPassword = project.property('mavenPassword');
+        }
         project.uploadArchives {
             repositories {
                 mavenDeployer {
