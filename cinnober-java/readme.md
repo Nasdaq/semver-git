@@ -11,10 +11,7 @@ In your `build.gradle` file:
     buildscript {
         repositories {
             maven {
-                url uri("http://nexus.cinnober.com/nexus/content/repositories/snapshots/")
-            }
-            maven {
-                url uri("http://nexus.cinnober.com/nexus/content/repositories/releases/")
+                url uri("http://nexus.cinnober.com/nexus/content/groups/public/")
             }
         }
         dependencies {

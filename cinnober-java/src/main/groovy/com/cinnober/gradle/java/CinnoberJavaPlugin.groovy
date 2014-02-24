@@ -19,12 +19,6 @@ class CinnoberJavaPlugin implements Plugin<Project> {
             maven {
                 url "http://nexus.cinnober.com/nexus/content/groups/public/"
             }
-            maven {
-                url "http://nexus.cinnober.com/nexus/content/repositories/buildtest_snapshots/"
-            }
-            maven {
-                url "http://nexus.cinnober.com/nexus/content/repositories/buildtest_releases/"
-            }
         }
         project.uploadArchives {
             repositories {
