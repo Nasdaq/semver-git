@@ -8,33 +8,10 @@ import org.gradle.api.tasks.compile.Compile
 class CinnoberJavaPlugin implements Plugin<Project> {
 
     void apply(Project project) {
-        // PENDING: move plugin maven, project.repositories and project.uploadArchives to separate plugin 'cinnober-nexus'
-        // then simply apply plugin 'cinnober-nexus' from here
-        project.apply plugin: 'maven'
+        project.apply plugin: 'cinnober-maven'
         project.apply plugin: 'java'
         project.apply plugin: 'eclipse'
         
-        project.repositories {
-            mavenLocal()
-            maven {
-                url "http://nexus.cinnober.com/nexus/content/groups/public/"
-            }
-        }
-        def mavenUser = project.hasProperty('mavenUser') ? project.property('mavenUser') : null;
-        def mavenPassword = project.hasProperty('mavenPassword') ? project.property('mavenPassword') : null;
-        project.uploadArchives {
-            repositories {
-                mavenDeployer {
-                    repository(url: "http://nexus.cinnober.com/nexus/content/repositories/releases/") {
-                        authentication(userName: mavenUser, password: mavenPassword)
-                    }
-                    snapshotRepository(url: "http://nexus.cinnober.com/nexus/content/repositories/snapshots/") {
-                        authentication(userName: mavenUser, password: mavenPassword)
-                    }
-                }
-            }
-        }
-    
         project.task('sourcesJar', type: Jar) {
             dependsOn 'classes'
             classifier = 'sources' 
