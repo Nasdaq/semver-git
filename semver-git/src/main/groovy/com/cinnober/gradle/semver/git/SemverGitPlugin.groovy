@@ -5,7 +5,7 @@ import org.gradle.api.Plugin
 
 class SemverGitPlugin implements Plugin<Project> {
 
-    def static String getGitVersion(String nextVersion) {
+    def static String getGitVersion(String nextVersion, boolean snapshotPolicy) {
         def proc = "git describe --exact-match".execute();
         proc.waitFor();
         if (proc.exitValue() == 0) {
@@ -14,10 +14,13 @@ class SemverGitPlugin implements Plugin<Project> {
         proc = "git describe".execute();
         proc.waitFor();
         if (proc.exitValue() == 0) {
-            def version = (proc.text.trim() =~ /-[0-9]+-g[0-9a-f]+$/).replaceFirst("")
-            return getNextVersion(version, nextVersion);
+            def describe = proc.text.trim()
+            def version = (describe =~ /-[0-9]+-g[0-9a-f]+$/).replaceFirst("")
+            def suffixMatcher = (describe =~ /-([0-9]+)-g([0-9a-f]+)$/)
+            def suffix = snapshotPolicy ? "SNAPSHOT" : "git." + suffixMatcher[0][1] + ".sha." + suffixMatcher[0][2]
+            return getNextVersion(version, nextVersion, suffix);
         }
-        return getNextVersion("0.0.0", nextVersion)
+        return getNextVersion("0.0.0", nextVersion, "SNAPSHOT")
     }
 
     def static checkVersion(String version) {
@@ -39,7 +42,7 @@ class SemverGitPlugin implements Plugin<Project> {
         return "" + version[0] + "." + version[1] + "." + version[2] + (version[3] != null ? "-" + version[3] : "");
     }
 
-    def static String getNextVersion(String version, String nextVersion) {
+    def static String getNextVersion(String version, String nextVersion, String snapshotSuffix) {
         def v
         switch (nextVersion) {
             case "major":
@@ -49,7 +52,7 @@ class SemverGitPlugin implements Plugin<Project> {
                     v[1] = 0
                     v[2] = 0
                 }
-                v[3] = "SNAPSHOT"
+                v[3] = snapshotSuffix
                 return formatVersion(v)
             case "minor":
                 v = parseVersion(version)
@@ -57,14 +60,14 @@ class SemverGitPlugin implements Plugin<Project> {
                     v[1] += 1
                     v[2] = 0
                 }
-                v[3] = "SNAPSHOT"
+                v[3] = snapshotSuffix
                 return formatVersion(v);
             case "patch":
                 v = parseVersion(version)
                 if (v[3] == null) {
                     v[2] += 1
                 }
-                v[3] = "SNAPSHOT"
+                v[3] = snapshotSuffix
                 return formatVersion(v);
             default:
                 return checkVersion(nextVersion);
@@ -73,10 +76,14 @@ class SemverGitPlugin implements Plugin<Project> {
 
     void apply(Project project) {
         def nextVersion = "minor"
+        def snapshotPolicy = "snapshot"
         if (project.ext.properties.containsKey("nextVersion")) {
             nextVersion = project.ext.nextVersion
         }
-        project.version = getGitVersion(nextVersion)
+        if (project.ext.properties.containsKey("snapshotPolicy")) {
+            snapshotPolicy = project.ext.snapshotPolicy
+        }
+        project.version = getGitVersion(nextVersion, snapshotPolicy.equals("snapshot"))
         project.task('showVersion') {
             group = 'Help'
             description = 'Show the project version'
@@ -99,3 +106,5 @@ class SemverGitPlugin implements Plugin<Project> {
 //println "nextVer(1.2.3-rc2) = " + SemverGitPlugin2.getNextVersion("1.2.3-rc2", "minor")
 //println "nextVer(1.2.3-rc2) = " + SemverGitPlugin2.getNextVersion("1.2.3-rc2", "patch")
 //println "nextVer(1.2.3-rc2) = " + SemverGitPlugin2.getNextVersion("1.2.3-rc2", "4.5.6")
+//println "nextVer(1.2.3) = " + SemverGitPlugin2.getNextVersion("1.2.3", "minor", "SNAPSHOT")
+//println "nextVer(1.2.3) = " + SemverGitPlugin2.getNextVersion("1.2.3", "minor", "git.5.sha.g4234234")
