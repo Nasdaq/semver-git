@@ -31,7 +31,7 @@ class CinnoberMavenPlugin implements Plugin<Project> {
             connection.setReadTimeout(timeoutInMillis)
             connection.setRequestMethod("HEAD")
             def responseCode = connection.getResponseCode()
-            return (200 <= responseCode || responseCode >= 399)
+            return (200 <= responseCode && responseCode <= 399)
         } catch (IOException ignored) {
             return false
         }
