@@ -14,11 +14,11 @@ In your `build.gradle` file:
             }
         }
         dependencies {
-            classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '1.0.0'
+            classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.0.0'
         }
     }
     // optionally: ext.nextVersion = "major", "minor" (default), "patch" or e.g. "3.0.0-rc2"
-    // optionally: ext.snapshotPolicy = "snapshot" (default), "prerelease"
+    // optionally: ext.snapshotSuffix = "SNAPSHOT" (default) or a pattern, e.g. "<count>.g<sha>-SNAPSHOT"
     apply plugin 'semver-git'
 
 Then everything should just work. To create a release, create an annotated git tag, e.g.:
@@ -27,7 +27,12 @@ Then everything should just work. To create a release, create an annotated git t
     git push --tags
 
 When standing on an annotated tag commit, then version is simply the same as the tag (1.0.0 in this example).
-After a few commits `git describe` will show something like `1.0.0-5-g524234` in which case the version
+After a few commits `git describe` will show something like `1.0.0-5-g5242341` in which case the version
 is the snapshot of the next version. In this example the next version is minor, and the version will be
-`1.1.0-SNAPSHOT`. If the snapshot policy is `prerelease` a pre release is created instead of a snapshot,
-and the version will be `1.1.0-git.5.sha.524234`.
+`1.1.0-SNAPSHOT`.
+
+The snapshot suffix pattern can contain `<count>` and `<sha>` which will be replaced with the commit count (`5`)
+and the commit sha (`5242341`) respectively. For example the snapshot suffix `<count>.g<sha>` will generate
+the version `1.1.0-5.g5242341`, i.e. a non-snapshot pre-release.
+Another useful snapshot suffix pattern is `<count>.g<sha>-SNAPSHOT` which will generate the version
+`1.1.0-5.g5242341-SNAPSHOT`, which is a unique snapshot version.

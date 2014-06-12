@@ -5,7 +5,7 @@ import org.gradle.api.Plugin
 
 class SemverGitPlugin implements Plugin<Project> {
 
-    def static String getGitVersion(String nextVersion, boolean snapshotPolicy) {
+    def static String getGitVersion(String nextVersion, String snapshotSuffix) {
         def proc = "git describe --exact-match".execute();
         proc.waitFor();
         if (proc.exitValue() == 0) {
@@ -17,7 +17,11 @@ class SemverGitPlugin implements Plugin<Project> {
             def describe = proc.text.trim()
             def version = (describe =~ /-[0-9]+-g[0-9a-f]+$/).replaceFirst("")
             def suffixMatcher = (describe =~ /-([0-9]+)-g([0-9a-f]+)$/)
-            def suffix = snapshotPolicy ? "SNAPSHOT" : "git." + suffixMatcher[0][1] + ".sha." + suffixMatcher[0][2]
+            def count = suffixMatcher[0][1];
+            def sha = suffixMatcher[0][2];
+            def suffix = snapshotSuffix;
+            suffix = suffix.replaceAll("<count>", count);
+            suffix = suffix.replaceAll("<sha>", sha);
             return getNextVersion(version, nextVersion, suffix);
         }
         return getNextVersion("0.0.0", nextVersion, "SNAPSHOT")
@@ -76,14 +80,14 @@ class SemverGitPlugin implements Plugin<Project> {
 
     void apply(Project project) {
         def nextVersion = "minor"
-        def snapshotPolicy = "snapshot"
+        def snapshotSuffix = "SNAPSHOT"
         if (project.ext.properties.containsKey("nextVersion")) {
             nextVersion = project.ext.nextVersion
         }
-        if (project.ext.properties.containsKey("snapshotPolicy")) {
-            snapshotPolicy = project.ext.snapshotPolicy
+        if (project.ext.properties.containsKey("snapshotSuffix")) {
+            snapshotSuffix = project.ext.snapshotSuffix
         }
-        project.version = getGitVersion(nextVersion, snapshotPolicy.equals("snapshot"))
+        project.version = getGitVersion(nextVersion, snapshotSuffix)
         project.task('showVersion') {
             group = 'Help'
             description = 'Show the project version'
