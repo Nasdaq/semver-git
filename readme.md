@@ -41,3 +41,18 @@ version `1.1.0-5.g5242341`, i.e. a non-snapshot pre-release.
 For example the snapshot suffix pattern is `<count>.g<sha>-SNAPSHOT`
 which will generate the version `1.1.0-5.g5242341-SNAPSHOT`, which is
 a unique snapshot version.
+
+### Release ###
+
+Versions are stored as annotated tags in git. [Semantic versioning](http://semver.org) is used.
+
+To create a new release, e.g. 1.2.3:
+
+    git tag -a 1.2.3 -m "New release"
+    git push --tags
+
+Then do the following to upload archives. mavenUser and mavenPassword are required in your ~/.gradle/gradle.properties for `uploadArchives`
+
+    gradle clean build uploadArchives
+
+If changes are made after version 1.2.3 then the version number be '1.3.0-SNAPSHOT' (default a minor change).
