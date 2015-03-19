@@ -1,3 +1,5 @@
 *~
 .nb-gradle
 .gradle
+/build
+/buildSrc/build
