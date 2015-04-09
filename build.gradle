@@ -1,3 +1,4 @@
+description = 'Gradle plugin that combines git tags and semantic versioning, and sets the gradle version property accordingly.'
 apply plugin: 'groovy'
 
 dependencies {
@@ -6,6 +7,7 @@ dependencies {
 }
 
 apply plugin: 'maven'
+apply plugin: 'signing'
 
 repositories {
     mavenCentral()
@@ -15,19 +17,46 @@ dependencies {
     testCompile 'junit:junit:4.11'
 }
 
+signing {
+    sign configurations.archives
+}
+
+// the following sets the version property
 plugins.apply com.cinnober.gradle.semver_git.SemverGitPlugin
 
 group = 'com.cinnober.gradle'
-//version = '2.1.0-SNAPSHOT' // previous version was 2.0.0
 
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: "http://nexus.cinnober.com/nexus/content/repositories/releases/") {
-                authentication(userName: mavenUser, password: mavenPassword)
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+              authentication(userName: ossrhUsername, password: ossrhPassword)
             }
-            snapshotRepository(url: "http://nexus.cinnober.com/nexus/content/repositories/snapshots/") {
-                authentication(userName: mavenUser, password: mavenPassword)
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+              authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+            pom.project {
+              name project.name
+              description project.description
+              packaging 'jar'
+              // artifactId defaults to project.name
+              url 'https://github.com/cinnober/semver-git'
+
+              scm {
+                connection 'scm:git:https://github.com/cinnober/semver-git'
+                developerConnection 'scm:git:https://github.com/cinnober/semver-git'
+                url 'https://github.com/cinnober/semver-git'
+              }
+
+              licenses {
+                license {
+                  name 'MIT License'
+                  url 'http://www.opensource.org/licenses/mit-license.php'
+                }
+              }
             }
         }
     }
