@@ -52,7 +52,7 @@ To create a new release, e.g. 1.2.3:
     git tag -a 1.2.3 -m "New release"
     git push --tags
 
-Then do the following to upload archives. mavenUser and mavenPassword are required in your ~/.gradle/gradle.properties for `uploadArchives`
+Then do the following to upload archives. Note that your credentials are required in e.g. your ~/.gradle/gradle.properties for `uploadArchives`. See [gradle.properties](gradle.properties) for more information.
 
     gradle clean build uploadArchives
 
