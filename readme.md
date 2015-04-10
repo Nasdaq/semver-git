@@ -58,7 +58,7 @@ To upload the archives to the Maven Central (through the OSSRH), run:
 
 To upload the plugin to the Gradle Plugin Portal, run:
 
-    gradle clean build uploadPlugins
+    gradle clean build publishPlugins
 
 Note that credentials are required for uploads. They should be placed in e.g. your
 ~/.gradle/gradle.properties for `uploadArchives`.
