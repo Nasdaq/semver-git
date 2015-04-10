@@ -13,7 +13,6 @@ buildscript {
 
 apply plugin: "com.gradle.plugin-publish"
 
-
 apply plugin: 'groovy'
 
 dependencies {
@@ -32,15 +31,31 @@ dependencies {
     testCompile 'junit:junit:4.11'
 }
 
-signing {
-    required { gradle.taskGraph.hasTask("uploadArchives") }
-    sign configurations.archives
-}
-
 // the following sets the version property
 plugins.apply com.cinnober.gradle.semver_git.SemverGitPlugin
 
 group = 'com.cinnober.gradle'
+
+// -- Maven Central --
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    required { gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
 
 uploadArchives {
     repositories {
@@ -77,6 +92,8 @@ uploadArchives {
         }
     }
 }
+
+// -- Gradle Plugin Portal --
 
 pluginBundle {
   website = 'https://github.com/cinnober/semver-git'
