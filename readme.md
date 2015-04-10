@@ -10,12 +10,10 @@ In your `build.gradle` file:
 
     buildscript {
         repositories {
-            maven {
-                url uri("http://nexus.cinnober.com/nexus/content/groups/public/")
-            }
+            mavenCentral() {
         }
         dependencies {
-            classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.0.0'
+            classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.2.0'
         }
     }
     // optionally: ext.nextVersion = "major", "minor" (default), "patch" or e.g. "3.0.0-rc2"
@@ -52,8 +50,16 @@ To create a new release, e.g. 1.2.3:
     git tag -a 1.2.3 -m "New release"
     git push --tags
 
-Then do the following to upload archives. Note that your credentials are required in e.g. your ~/.gradle/gradle.properties for `uploadArchives`. See [gradle.properties](gradle.properties) for more information.
+If changes are made after version 1.2.3 then the version number be '1.3.0-SNAPSHOT' (default a minor change).
+
+To upload the archives to the Maven Central (through the OSSRH), run:
 
     gradle clean build uploadArchives
 
-If changes are made after version 1.2.3 then the version number be '1.3.0-SNAPSHOT' (default a minor change).
+To upload the plugin to the Gradle Plugin Portal, run:
+
+    gradle clean build uploadPlugins
+
+Note that credentials are required for uploads. They should be placed in e.g. your
+~/.gradle/gradle.properties for `uploadArchives`.
+See [gradle.properties](gradle.properties) for more information.
