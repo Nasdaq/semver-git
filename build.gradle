@@ -16,19 +16,19 @@ apply plugin: "com.gradle.plugin-publish"
 apply plugin: 'groovy'
 
 dependencies {
-    compile gradleApi()
-    compile localGroovy()
+  compile gradleApi()
+  compile localGroovy()
 }
 
 apply plugin: 'maven'
 apply plugin: 'signing'
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 dependencies {
-    testCompile 'junit:junit:4.11'
+  testCompile 'junit:junit:4.11'
 }
 
 // the following sets the version property
@@ -39,58 +39,65 @@ group = 'com.cinnober.gradle'
 // -- Maven Central --
 
 task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
+  classifier = 'javadoc'
+  from javadoc
 }
 
 task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+  classifier = 'sources'
+  from sourceSets.main.allSource
 }
 
 artifacts {
-    archives javadocJar, sourcesJar
+  archives javadocJar, sourcesJar
 }
 
 signing {
-    required { gradle.taskGraph.hasTask("uploadArchives") }
-    sign configurations.archives
+  required { gradle.taskGraph.hasTask("uploadArchives") }
+  sign configurations.archives
 }
 
 uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+      
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+      
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
               authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-              authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-            pom.project {
-              name project.name
-              description project.description
-              packaging 'jar'
-              // artifactId defaults to project.name
-              url 'https://github.com/cinnober/semver-git'
-
-              scm {
-                connection 'scm:git:https://github.com/cinnober/semver-git'
-                developerConnection 'scm:git:https://github.com/cinnober/semver-git'
-                url 'https://github.com/cinnober/semver-git'
-              }
-
-              licenses {
-                license {
-                  name 'MIT License'
-                  url 'http://www.opensource.org/licenses/mit-license.php'
-                }
-              }
-            }
+      }
+      pom.project {
+        name project.name
+        description project.description
+        packaging 'jar'
+        // artifactId defaults to project.name
+        url 'https://github.com/cinnober/semver-git'
+        
+        scm {
+          connection 'scm:git:https://github.com/cinnober/semver-git'
+          developerConnection 'scm:git:https://github.com/cinnober/semver-git'
+          url 'https://github.com/cinnober/semver-git'
         }
+        
+        licenses {
+          license {
+            name 'MIT License'
+            url 'http://www.opensource.org/licenses/mit-license.php'
+          }
+        }
+        developers {
+          developer {
+            id 'mikael.brannstrom'
+            name 'Mikael Brännström'
+            email 'mikael.brannstrom@cinnober.com'
+          }
+        }        
+      }
     }
+  }
 }
 
 // -- Gradle Plugin Portal --
