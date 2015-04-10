@@ -91,3 +91,12 @@ pluginBundle {
     }
   }
 }
+
+task (fixPublishPlugins) {
+  // Gradle Plugin Portal does not support signed artifacts, but Maven Central requires signed artifacts.
+  // Remove signed artifacts if publishing to Gradle Plugin Portal
+  doFirst {
+    configurations.archives.artifacts.removeAll { it.extension == "asc" }
+  }
+}
+publishPlugins.dependsOn fixPublishPlugins
