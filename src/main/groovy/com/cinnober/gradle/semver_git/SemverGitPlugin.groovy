@@ -29,13 +29,13 @@ import org.gradle.api.Plugin
 
 class SemverGitPlugin implements Plugin<Project> {
 
-    def static String getGitVersion(String nextVersion, String snapshotSuffix) {
-        def proc = "git describe --exact-match".execute();
+    def static String getGitVersion(String nextVersion, String snapshotSuffix, File projectDir = null) {
+        def proc = "git describe --exact-match".execute(null, projectDir);
         proc.waitFor();
         if (proc.exitValue() == 0) {
             return checkVersion(proc.text.trim());
         }
-        proc = "git describe".execute();
+        proc = "git describe".execute(null, projectDir);
         proc.waitFor();
         if (proc.exitValue() == 0) {
             def describe = proc.text.trim()
@@ -111,7 +111,7 @@ class SemverGitPlugin implements Plugin<Project> {
         if (project.ext.properties.containsKey("snapshotSuffix")) {
             snapshotSuffix = project.ext.snapshotSuffix
         }
-        project.version = getGitVersion(nextVersion, snapshotSuffix)
+        project.version = getGitVersion(nextVersion, snapshotSuffix, project.projectDir)
         project.task('showVersion') {
             group = 'Help'
             description = 'Show the project version'
