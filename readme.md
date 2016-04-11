@@ -19,6 +19,8 @@ In your `build.gradle` file:
     // optionally: ext.nextVersion = "major", "minor" (default), "patch" or e.g. "3.0.0-rc2"
     // optionally: ext.snapshotSuffix = "SNAPSHOT" (default) or a pattern, e.g. "<count>.g<sha>-SNAPSHOT"
     apply plugin 'com.cinnober.gradle.semver-git'
+    
+Note: Use this method instead of the newer `plugins` method if you want to change `nextVersion` and `snapshotSuffix`.
 
 Then everything should just work. To create a release, create an
 annotated git tag, e.g.:
