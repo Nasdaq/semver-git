@@ -10,7 +10,7 @@ In your `build.gradle` file:
 
     buildscript {
         repositories {
-            mavenCentral() {
+            mavenCentral()
         }
         dependencies {
             classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.2.0'
