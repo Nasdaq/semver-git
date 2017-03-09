@@ -116,7 +116,7 @@ class SemverGitPlugin implements Plugin<Project> {
             group = 'Help'
             description = 'Show the project version'
         }
-        project.tasks.showVersion << {
+        project.tasks.showVersion.doLast {
             println "Version: " + project.version
         }
     }
