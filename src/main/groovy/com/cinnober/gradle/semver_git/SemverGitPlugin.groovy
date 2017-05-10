@@ -24,8 +24,8 @@
 
 package com.cinnober.gradle.semver_git
 
-import org.gradle.api.Project
 import org.gradle.api.Plugin
+import org.gradle.api.Project
 
 class SemverGitPlugin implements Plugin<Project> {
 
@@ -111,6 +111,9 @@ class SemverGitPlugin implements Plugin<Project> {
         if (project.ext.properties.containsKey("snapshotSuffix")) {
             snapshotSuffix = project.ext.snapshotSuffix
         }
+
+        project.getLogger().info("semver-git is using [$nextVersion] as nextVersion and [$snapshotSuffix] as snapshotSuffix.")
+
         project.version = getGitVersion(nextVersion, snapshotSuffix, project.projectDir)
         project.task('showVersion') {
             group = 'Help'
