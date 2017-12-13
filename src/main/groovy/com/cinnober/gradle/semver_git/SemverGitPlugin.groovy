@@ -29,13 +29,13 @@ import org.gradle.api.Plugin
 
 class SemverGitPlugin implements Plugin<Project> {
 
-    def static String getGitVersion(String nextVersion, String snapshotSuffix, File projectDir = null) {
-        def proc = "git describe --exact-match".execute(null, projectDir);
+    def static String getGitVersion(String nextVersion, String snapshotSuffix, String gitArgs, File projectDir = null) {
+        def proc = ("git describe --exact-match " + gitArgs).execute(null, projectDir);
         proc.waitFor();
         if (proc.exitValue() == 0) {
             return checkVersion(proc.text.trim());
         }
-        proc = "git describe".execute(null, projectDir);
+        proc =("git describe " + gitArgs).execute(null, projectDir);
         proc.waitFor();
         if (proc.exitValue() == 0) {
             def describe = proc.text.trim()
@@ -105,13 +105,17 @@ class SemverGitPlugin implements Plugin<Project> {
     void apply(Project project) {
         def nextVersion = "minor"
         def snapshotSuffix = "SNAPSHOT"
+        def gitDescribeArgs = '--match *[0-9].[0-9]*.[0-9]*'
         if (project.ext.properties.containsKey("nextVersion")) {
             nextVersion = project.ext.nextVersion
         }
         if (project.ext.properties.containsKey("snapshotSuffix")) {
             snapshotSuffix = project.ext.snapshotSuffix
         }
-        project.version = getGitVersion(nextVersion, snapshotSuffix, project.projectDir)
+        if (project.ext.properties.containsKey("gitDescribeArgs")) {
+            gitDescribeArgs = project.ext.gitDescribeArgs
+        }
+        project.version = getGitVersion(nextVersion, snapshotSuffix, gitDescribeArgs, project.projectDir)
         project.task('showVersion') {
             group = 'Help'
             description = 'Show the project version'
