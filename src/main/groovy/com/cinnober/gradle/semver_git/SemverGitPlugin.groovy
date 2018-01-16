@@ -35,7 +35,7 @@ class SemverGitPlugin implements Plugin<Project> {
         if (proc.exitValue() == 0) {
             return checkVersion(proc.text.trim());
         }
-        proc =("git describe " + gitArgs).execute(null, projectDir);
+        proc =("git describe --abbrev=7 " + gitArgs).execute(null, projectDir);
         proc.waitFor();
         if (proc.exitValue() == 0) {
             def describe = proc.text.trim()
