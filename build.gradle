@@ -23,6 +23,12 @@ dependencies {
 
 apply plugin: 'maven'
 apply plugin: 'signing'
+apply plugin: 'wrapper'
+
+wrapper {
+  gradleVersion = "4.6"
+  distributionType = Wrapper.DistributionType.ALL
+}
 
 repositories {
   mavenCentral()
