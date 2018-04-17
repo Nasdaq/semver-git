@@ -120,4 +120,7 @@ class SemverGitPluginTest extends GroovyTestCase {
         testNextVersion("1.0.0-SNAPSHOT", "1.0.0-beta", "major", "SNAPSHOT");
     }
 
+    void testCheckVersionShouldReturnWithoutRefsTags() {
+        assertEquals("1.0.0-beta", SemverGitPlugin.checkVersion("refs/tags/1.0.0-beta"))
+    }
 }

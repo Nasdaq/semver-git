@@ -52,8 +52,7 @@ class SemverGitPlugin implements Plugin<Project> {
     }
 
     def static String checkVersion(String version) {
-        parseVersion(version);
-        return version;
+        return formatVersion(parseVersion(version));
     }
 
     def static Object[] parseVersion(String version) {
