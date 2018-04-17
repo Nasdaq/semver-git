@@ -43,7 +43,7 @@ class SemverGitPluginTest extends GroovyTestCase {
         testParseVersion("1.2.3-SNAPSHOT", [1,2,3,"SNAPSHOT"]);
     }
     void testParseVersion12_34_56_rc78() {
-        testParseVersion("refs/tags/12.34.56-rc78", [12,34,56,"rc78"]);
+        testParseVersion("12.34.56-rc78", [12,34,56,"rc78"]);
     }
     void testParseVersionRefsTags100() {
         testParseVersion("refs/tags/1.0.0", [1,0,0,null]);
