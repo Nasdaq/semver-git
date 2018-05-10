@@ -23,6 +23,12 @@ dependencies {
 
 apply plugin: 'maven'
 apply plugin: 'signing'
+apply plugin: 'wrapper'
+
+wrapper {
+  gradleVersion = "4.6"
+  distributionType = Wrapper.DistributionType.ALL
+}
 
 repositories {
   mavenCentral()
@@ -121,7 +127,16 @@ task (fixPublishPlugins) {
   // Gradle Plugin Portal does not support signed artifacts, but Maven Central requires signed artifacts.
   // Remove signed artifacts if publishing to Gradle Plugin Portal
   doFirst {
-    configurations.archives.artifacts.removeAll { it.extension == "asc" }
+    configurations.archives.artifacts.with { archives ->
+      def jarArtifact
+        archives.each {
+          if (it.extension == 'asc') {
+            jarArtifact = it
+          }
+        }
+      remove(jarArtifact)
+    }
   }
 }
 publishPlugins.dependsOn fixPublishPlugins
+
