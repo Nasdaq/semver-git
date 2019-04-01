@@ -124,7 +124,13 @@ class SemverGitPlugin implements Plugin<Project> {
         if (project.ext.properties.containsKey("dirtyMarker")) {
             dirtyMarker = project.ext.dirtyMarker
         }
-        project.version = getGitVersion(nextVersion, snapshotSuffix, dirtyMarker, gitDescribeArgs, project.projectDir)
+        def parsedVersion = getGitVersion(nextVersion, snapshotSuffix, dirtyMarker, gitDescribeArgs, project.projectDir)
+        project.version = parsedVersion
+        if (project.ext.properties.get("applyVersionOnSubprojects", false) as boolean) {
+            project.subprojects {
+                version = parsedVersion
+            }
+        }
         project.task('showVersion') {
             group = 'Help'
             description = 'Show the project version'
