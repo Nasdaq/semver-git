@@ -20,6 +20,7 @@ In your `build.gradle` file:
     // optionally: ext.snapshotSuffix = "SNAPSHOT" (default) or a pattern, e.g. "<count>.g<sha><dirty>-SNAPSHOT"
     // optionally: ext.dirtyMarker = "-dirty" (default) replaces <dirty> in snapshotSuffix
     // optionally: ext.gitDescribeArgs = '--match *[0-9].[0-9]*.[0-9]*' (default) or other arguments for git describe.
+    // optionally: ext.prefix = "" (default) "prefix-" ignore prefix in tag "prefix-1.0.0-rc2"
     apply plugin: 'com.cinnober.gradle.semver-git'
     
 Note: Use this method instead of the newer `plugins` method if you want to change `nextVersion` and `snapshotSuffix`.

@@ -27,8 +27,8 @@ package com.cinnober.gradle.semver_git
 import groovy.util.GroovyTestCase
 
 class SemverGitPluginTest extends GroovyTestCase { 
-    void testParseVersion(versionStr, expVersionArr) {
-        assertArrayEquals((Object[])expVersionArr, (Object[])SemverGitPlugin.parseVersion(versionStr));
+    void testParseVersion(versionStr, expVersionArr, prefix = "") {
+        assertArrayEquals((Object[])expVersionArr, (Object[])SemverGitPlugin.parseVersion(versionStr, prefix));
     }
     void testParseVersion100() {
         testParseVersion("1.0.0", [1,0,0,null]);
@@ -77,8 +77,8 @@ class SemverGitPluginTest extends GroovyTestCase {
         testFormatVersion("12.34.56-rc78", [12,34,56,"rc78"]);
     }
 
-    void testNextVersion(expVersion, version, nextVersion, snapshotSuffix) {
-        assertEquals(expVersion, SemverGitPlugin.getNextVersion(version, nextVersion, snapshotSuffix));
+    void testNextVersion(expVersion, version, nextVersion, snapshotSuffix, prefix = "") {
+        assertEquals(expVersion, SemverGitPlugin.getNextVersion(version, nextVersion, snapshotSuffix, prefix));
     }
     void testNextPatchVersion123() {
         testNextVersion("1.2.4-SNAPSHOT", "1.2.3", "patch", "SNAPSHOT");
@@ -105,4 +105,50 @@ class SemverGitPluginTest extends GroovyTestCase {
         testNextVersion("1.0.0-SNAPSHOT", "1.0.0-beta", "major", "SNAPSHOT");
     }
 
+    void testParseVersion100WithPrefix() {
+        testParseVersion("prefix-1.0.0", [1,0,0,null], "prefix-");
+    }
+    void testParseVersion123snapshotWithPrefix() {
+        testParseVersion("prefix-1.2.3-SNAPSHOT", [1,2,3,"SNAPSHOT"], "prefix-");
+    }
+    void testParseVersion123snapshotWithPrefix231abc() {
+        testParseVersion("231abc-1.2.3-SNAPSHOT", [1,2,3,"SNAPSHOT"], "231abc-");
+    }
+    void testParseVersion123snapshotWithPrefixab_c() {
+        testParseVersion("ab_c-1.2.3-SNAPSHOT", [1,2,3,"SNAPSHOT"], "ab_c-");
+    }
+
+    void testFailParseVersion_abcWithPrefix() {
+        shouldFail({SemverGitPlugin.parseVersion("prefix-a.b.c", "prefix-")});
+    }
+    void testFailParseVersion_1WithPrefix() {
+        shouldFail({SemverGitPlugin.parseVersion("prefix-1", "prefix-")});
+    }
+    void testFailParseVersion_123aWithPrefix() {
+        shouldFail({SemverGitPlugin.parseVersion("prefix-1.2.3a", "prefix-")});
+    }
+    void testFailParseVersion_123aWithWrongPrefix() {
+        shouldFail({SemverGitPlugin.parseVersion("notfix-1.2.3a", "prefix-")});
+    }
+
+    void testNextPatchVersion123WithPrefix() {
+        testNextVersion("1.2.4-SNAPSHOT", "prefix-1.2.3", "patch", "SNAPSHOT", "prefix-");
+    }
+    void testNextPatchVersion123betaWithPrefix() {
+        testNextVersion("1.2.3-SNAPSHOT", "prefix-1.2.3-beta", "patch", "SNAPSHOT", "prefix-");
+    }
+    void testNextMinorVersion123WithPrefix() {
+        testNextVersion("1.3.0-SNAPSHOT", "prefix-1.2.3", "minor", "SNAPSHOT", "prefix-");
+    }
+    void testNextMinorVersion123betaWithPrefix() {
+        testNextVersion("1.2.3-SNAPSHOT", "prefix-1.2.3-beta", "minor", "SNAPSHOT", "prefix-");
+    }
+    void testNextMajorVersion123WithPrefix() {
+        testNextVersion("2.0.0-SNAPSHOT", "prefix-1.2.3", "major", "SNAPSHOT", "prefix-");
+    }
+    void testNextMajorVersion100betaWithPrefix() {
+        testNextVersion("1.0.0-SNAPSHOT", "prefix-1.0.0-beta", "major", "SNAPSHOT", "prefix-");
+    }
+
 }
+
