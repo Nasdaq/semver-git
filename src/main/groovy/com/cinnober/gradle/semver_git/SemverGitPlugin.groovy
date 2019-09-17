@@ -119,15 +119,17 @@ class SemverGitPlugin implements Plugin<Project> {
         if (project.ext.properties.containsKey("snapshotSuffix")) {
             snapshotSuffix = project.ext.snapshotSuffix
         }
+        if (project.ext.properties.containsKey("prefix")) {
+            prefix = project.ext.prefix
+            gitDescribeArgs = "--match ${prefix}*[0-9].[0-9]*.[0-9]*"
+        }
         if (project.ext.properties.containsKey("gitDescribeArgs")) {
             gitDescribeArgs = project.ext.gitDescribeArgs
         }
         if (project.ext.properties.containsKey("dirtyMarker")) {
             dirtyMarker = project.ext.dirtyMarker
         }
-        if (project.ext.properties.containsKey("prefix")) {
-            prefix = project.ext.prefix
-        }
+
         project.version = getGitVersion(
             nextVersion, 
             snapshotSuffix, 
