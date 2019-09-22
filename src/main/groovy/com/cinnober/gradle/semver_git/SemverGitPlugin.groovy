@@ -33,7 +33,7 @@ class SemverGitPlugin implements Plugin<Project> {
         def proc = ("git describe --exact-match " + gitArgs).execute(null, projectDir);
         proc.waitFor();
         if (proc.exitValue() == 0) {
-            return checkVersion(proc.text.trim());
+            return formatVersion(parseVersion(proc.text.trim()));
         }
         proc = ("git describe --tags --dirty --abbrev=7 " + gitArgs).execute(null, projectDir);
         proc.waitFor();
@@ -62,13 +62,13 @@ class SemverGitPlugin implements Plugin<Project> {
     }
 
     def static Object[] parseVersion(String version) {
-        def pattern = /^([0-9]+)\.([0-9]+)\.([0-9]+)(-([a-zA-Z0-9.-]+))?$/
+        def pattern = /^([a-zA-Z-]+)?([0-9]+)\.([0-9]+)\.([0-9]+)(-([a-zA-Z0-9.-]+))?$/
         def matcher = version =~ pattern
         def arr = matcher.collect { it }[0]
         if (arr == null) {
             throw new IllegalArgumentException("Not a valid version: '" + version + "'")
         }
-        return [arr[1].toInteger(), arr[2].toInteger(), arr[3].toInteger(), arr[5]]
+        return [arr[2].toInteger(), arr[3].toInteger(), arr[4].toInteger(), arr[6]]
     }
 
     def static String formatVersion(version) {

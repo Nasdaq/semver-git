@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/cinnober/semver-git.svg?branch=master)](https://travis-ci.org/cinnober/semver-git)
 
 The gradle plugin 'semver-git' sets the `project.version` based on _annotated_ git tags.
-Version numbers must follow [Semantic Versioning 2.0.0](http://semver.org/spec/v2.0.0.html), with the syntax _major.minor.patch_.
+Version numbers must follow [Semantic Versioning 2.0.0](http://semver.org/spec/v2.0.0.html), with the syntax _major.minor.patch_. Git tag can have a prefix but it will be removed in the output.
 
 ## Usage ##
 
