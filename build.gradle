@@ -1,5 +1,3 @@
-description = 'Gradle plugin that combines git tags and semantic versioning, and sets the gradle version property accordingly.'
-
 buildscript {
   repositories {
     maven {
@@ -7,9 +5,16 @@ buildscript {
     }
   }
   dependencies {
-    classpath "com.gradle.publish:plugin-publish-plugin:0.9.1"
+    classpath "com.gradle.publish:plugin-publish-plugin:0.10.1"
   }
 }
+
+plugins {
+  id("se.patrikerdes.use-latest-versions") version "0.2.13"
+  id("com.github.ben-manes.versions") version "0.27.0"
+}
+
+description = 'Gradle plugin that combines git tags and semantic versioning, and sets the gradle version property accordingly.'
 
 apply plugin: "com.gradle.plugin-publish"
 
@@ -35,7 +40,7 @@ repositories {
 }
 
 dependencies {
-  testCompile 'junit:junit:4.11'
+  testCompile 'junit:junit:4.12'
 }
 
 // the following sets the version property
