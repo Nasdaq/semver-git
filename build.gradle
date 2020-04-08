@@ -62,6 +62,7 @@ gradlePlugin {
     semver {
       id = "com.cinnober.gradle.semver-git"
       implementationClass = "com.cinnober.gradle.semver_git.SemverGitPlugin"
+      displayName = "semver-git"
     }
   }
 }
@@ -71,13 +72,6 @@ pluginBundle {
   vcsUrl = 'https://github.com/cinnober/semver-git'
   description = project.description
   tags = ['git', 'semantic-versioning', 'semver']
-
-  plugins {
-    semvergitPlugin {
-      id = 'com.cinnober.gradle.semver-git'
-      displayName = 'semver-git'
-    }
-  }
 }
 
 publishing {
