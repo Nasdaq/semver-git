@@ -57,12 +57,11 @@ class SemverGitPlugin implements Plugin<Project> {
     }
 
     def static String checkVersion(String version) {
-        parseVersion(version);
-        return version;
+        return formatVersion(parseVersion(version));
     }
 
     def static Object[] parseVersion(String version) {
-        def pattern = /^([0-9]+)\.([0-9]+)\.([0-9]+)(-([a-zA-Z0-9.-]+))?$/
+        def pattern = /^(?:refs\/tags\/)?([0-9]+)\.([0-9]+)\.([0-9]+)(-([a-zA-Z0-9.-]+))?$/
         def matcher = version =~ pattern
         def arr = matcher.collect { it }[0]
         if (arr == null) {
