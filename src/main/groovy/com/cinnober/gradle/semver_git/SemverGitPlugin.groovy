@@ -29,16 +29,20 @@ import org.gradle.api.Project
 
 class SemverGitPlugin implements Plugin<Project> {
 
-    def static String getGitVersion(String nextVersion, String snapshotSuffix, String gitArgs, File projectDir = null) {
+    def static String getGitVersion(String nextVersion, String snapshotSuffix, String dirtyMarker, String gitArgs, File projectDir = null) {
         def proc = ("git describe --exact-match " + gitArgs).execute(null, projectDir);
         proc.waitFor();
         if (proc.exitValue() == 0) {
             return checkVersion(proc.text.trim());
         }
-        proc =("git describe --abbrev=7 " + gitArgs).execute(null, projectDir);
+        proc = ("git describe --tags --dirty --abbrev=7 " + gitArgs).execute(null, projectDir);
         proc.waitFor();
         if (proc.exitValue() == 0) {
             def describe = proc.text.trim()
+            def dirty =  describe.endsWith('-dirty')
+            if (dirty) {
+                describe = describe.substring(0, describe.length() - 6)
+            }
             def version = (describe =~ /-[0-9]+-g[0-9a-f]+$/).replaceFirst("")
             def suffixMatcher = (describe =~ /-([0-9]+)-g([0-9a-f]+)$/)
             def count = suffixMatcher[0][1];
@@ -46,6 +50,7 @@ class SemverGitPlugin implements Plugin<Project> {
             def suffix = snapshotSuffix;
             suffix = suffix.replaceAll("<count>", count);
             suffix = suffix.replaceAll("<sha>", sha);
+            suffix = suffix.replaceAll("<dirty>", dirty ? dirtyMarker : '');
             return getNextVersion(version, nextVersion, suffix);
         }
         return getNextVersion("0.0.0", nextVersion, "SNAPSHOT")
@@ -105,6 +110,7 @@ class SemverGitPlugin implements Plugin<Project> {
     void apply(Project project) {
         def nextVersion = "minor"
         def snapshotSuffix = "SNAPSHOT"
+        def dirtyMarker = "-dirty"
         def gitDescribeArgs = '--match *[0-9].[0-9]*.[0-9]*'
         if (project.ext.properties.containsKey("nextVersion")) {
             nextVersion = project.ext.nextVersion
@@ -118,7 +124,11 @@ class SemverGitPlugin implements Plugin<Project> {
         if (project.ext.properties.containsKey("gitDescribeArgs")) {
             gitDescribeArgs = project.ext.gitDescribeArgs
         }
-        project.version = getGitVersion(nextVersion, snapshotSuffix, gitDescribeArgs, project.projectDir)
+
+        if (project.ext.properties.containsKey("dirtyMarker")) {
+            dirtyMarker = project.ext.dirtyMarker
+        }
+        project.version = getGitVersion(nextVersion, snapshotSuffix, dirtyMarker, gitDescribeArgs, project.projectDir)
 
         project.task('showVersion') {
             group = 'Help'

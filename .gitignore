@@ -4,3 +4,6 @@
 .gradle
 /build
 /buildSrc/build
+.idea
+*.iml
+out

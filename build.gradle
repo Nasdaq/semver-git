@@ -1,15 +1,11 @@
-description = 'Gradle plugin that combines git tags and semantic versioning, and sets the gradle version property accordingly.'
-
-buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
-  dependencies {
-    classpath "com.gradle.publish:plugin-publish-plugin:0.9.0"
-  }
+plugins {
+  id("se.patrikerdes.use-latest-versions") version "0.2.13"
+  id("com.github.ben-manes.versions") version "0.27.0"
+  id("java-gradle-plugin")
+  id "com.gradle.plugin-publish" version "0.11.0"
 }
+
+description = 'Gradle plugin that combines git tags and semantic versioning, and sets the gradle version property accordingly.'
 
 apply plugin: "com.gradle.plugin-publish"
 
@@ -21,12 +17,12 @@ dependencies {
   compile localGroovy()
 }
 
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: 'wrapper'
 
 wrapper {
-  gradleVersion = "4.6"
+  gradleVersion = "5.0"
   distributionType = Wrapper.DistributionType.ALL
 }
 
@@ -35,7 +31,7 @@ repositories {
 }
 
 dependencies {
-  testCompile 'junit:junit:4.11'
+  testCompile 'junit:junit:4.12'
 }
 
 // the following sets the version property
@@ -59,84 +55,69 @@ artifacts {
   archives javadocJar, sourcesJar
 }
 
-signing {
-  required { gradle.taskGraph.hasTask("uploadArchives") }
-  sign configurations.archives
-}
+// -- Gradle Plugin Portal --
 
-uploadArchives {
-  repositories {
-    mavenDeployer {
-      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-      
-      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-        authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
-      
-      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-              authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
-      pom.project {
-        name project.name
-        description project.description
-        packaging 'jar'
-        // artifactId defaults to project.name
-        url 'https://github.com/cinnober/semver-git'
-        
-        scm {
-          connection 'scm:git:https://github.com/cinnober/semver-git'
-          developerConnection 'scm:git:https://github.com/cinnober/semver-git'
-          url 'https://github.com/cinnober/semver-git'
-        }
-        
-        licenses {
-          license {
-            name 'MIT License'
-            url 'http://www.opensource.org/licenses/mit-license.php'
-          }
-        }
-        developers {
-          developer {
-            id 'mikael.brannstrom'
-            name 'Mikael Brännström'
-            email 'mikael.brannstrom@cinnober.com'
-          }
-        }        
-      }
+gradlePlugin {
+  plugins {
+    semver {
+      id = "com.cinnober.gradle.semver-git"
+      implementationClass = "com.cinnober.gradle.semver_git.SemverGitPlugin"
+      displayName = "semver-git"
     }
   }
 }
-
-// -- Gradle Plugin Portal --
 
 pluginBundle {
   website = 'https://github.com/cinnober/semver-git'
   vcsUrl = 'https://github.com/cinnober/semver-git'
   description = project.description
   tags = ['git', 'semantic-versioning', 'semver']
+}
 
-  plugins {
-    semvergitPlugin {
-      id = 'com.cinnober.gradle.semver-git'
-      displayName = 'semver-git'
+publishing {
+  repositories {
+    maven {
+      def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+      def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+      url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+
+      credentials {
+        username ossrhUsername
+        password ossrhPassword
+      }
     }
   }
 }
 
-task (fixPublishPlugins) {
-  // Gradle Plugin Portal does not support signed artifacts, but Maven Central requires signed artifacts.
-  // Remove signed artifacts if publishing to Gradle Plugin Portal
-  doFirst {
-    configurations.archives.artifacts.with { archives ->
-      def jarArtifact
-        archives.each {
-          if (it.extension == 'asc') {
-            jarArtifact = it
-          }
-        }
-      remove(jarArtifact)
+publishing.publications.whenObjectAdded {
+  it.pom {
+    url = 'https://github.com/cinnober/semver-git'
+    description = project.description
+
+    scm {
+      connection = 'scm:git:https://github.com/cinnober/semver-git'
+      developerConnection = 'scm:git:https://github.com/cinnober/semver-git'
+      url = 'https://github.com/cinnober/semver-git'
+    }
+
+    licenses {
+      license {
+        name = 'MIT License'
+        url = 'http://www.opensource.org/licenses/mit-license.php'
+      }
+    }
+
+    developers {
+      developer {
+        id = 'mikael.brannstrom'
+        name = 'Mikael Brännström'
+        email = 'mikael.brannstrom@cinnober.com'
+      }
+      developer {
+        id = 'deepy'
+        name = 'Alex Nordlund'
+        email = 'alexander.nordlund@cinnober.com'
+      }
     }
   }
 }
-publishPlugins.dependsOn fixPublishPlugins
-
