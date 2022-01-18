@@ -10,11 +10,13 @@ description = 'Gradle plugin that combines git tags and semantic versioning, and
 apply plugin: "com.gradle.plugin-publish"
 
 apply plugin: 'groovy'
-sourceCompatibility = '1.7'
+sourceCompatibility = '1.8'
 
 dependencies {
   compile gradleApi()
   compile localGroovy()
+  testImplementation platform("org.spockframework:spock-bom:2.0-groovy-2.5")
+  testImplementation "org.spockframework:spock-core"
 }
 
 apply plugin: 'maven-publish'
@@ -30,14 +32,14 @@ repositories {
   mavenCentral()
 }
 
-dependencies {
-  testCompile 'junit:junit:4.12'
-}
-
 // the following sets the version property
 plugins.apply com.cinnober.gradle.semver_git.SemverGitPlugin
 
 group = 'com.cinnober.gradle'
+
+test {
+  useJUnitPlatform()
+}
 
 // -- Maven Central --
 

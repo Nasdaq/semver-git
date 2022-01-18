@@ -24,93 +24,65 @@
 
 package com.cinnober.gradle.semver_git
 
-import groovy.util.GroovyTestCase
+import spock.lang.Specification
 
-class SemverGitPluginTest extends GroovyTestCase { 
-    void testParseVersion(versionStr, expVersionArr) {
-        assertArrayEquals((Object[])expVersionArr, (Object[])SemverGitPlugin.parseVersion(versionStr));
-    }
-    void testParseVersion100() {
-        testParseVersion("1.0.0", [1,0,0,null]);
-    }
-    void testParseVersion123() {
-        testParseVersion("1.2.3", [1,2,3,null]);
-    }
-    void testParseVersion123beta() {
-        testParseVersion("1.2.3-beta", [1,2,3,"beta"]);
-    }
-    void testParseVersionV123beta() {
-        testParseVersion("v1.2.3-beta", [1,2,3,"beta"]);
-    }
-    void testParseVersionPrefix123beta() {
-        testParseVersion("prefix-1.2.3-beta", [1,2,3,"beta"]);
-    }
-    void testParseVersion123snapshot() {
-        testParseVersion("1.2.3-SNAPSHOT", [1,2,3,"SNAPSHOT"]);
-    }
-    void testParseVersion12_34_56_rc78() {
-        testParseVersion("12.34.56-rc78", [12,34,56,"rc78"]);
-    }
-    void testFailParseVersion_abc() {
-        shouldFail({SemverGitPlugin.parseVersion("a.b.c")});
-    }
-    void testFailParseVersion_1() {
-        shouldFail({SemverGitPlugin.parseVersion("1")});
-    }
-    void testFailParseVersion_123a() {
-        shouldFail({SemverGitPlugin.parseVersion("1.2.3a")});
+
+class SemverGitPluginTest extends Specification {
+    def "parseVersion"(String input, expected) {
+        expect:
+        def actual = SemverGitPlugin.parseVersion(input)
+        expected == actual
+
+        where:
+        input           || expected
+        "1.0.0"         || [1,0,0,null]
+        "1.2.3"         || [1,2,3,null]
+        "1.2.3-beta"    || [1,2,3,"beta"]
+        "1.2.3-SNAPSHOT"|| [1,2,3,"SNAPSHOT"]
+        "12.34.56-rc78" || [12,34,56,"rc78"]
+        "v1.2.3"         || [1,2,3,null]
     }
 
-    void testFormatVersion(expVersionStr, versionArr) {
-        assertEquals(expVersionStr, SemverGitPlugin.formatVersion(versionArr));
-    }
-    void testFormatVersion100() {
-        testFormatVersion("1.0.0", [1,0,0,null]);
-    }
-    void testFormatVersion123() {
-        testFormatVersion("1.2.3", [1,2,3,null]);
-    }
-    void testFormatVersion123beta() {
-        testFormatVersion("1.2.3-beta", [1,2,3,"beta"]);
-    }
-    void testFormatVersion123snapshot() {
-        testFormatVersion("1.2.3-SNAPSHOT", [1,2,3,"SNAPSHOT"]);
-    }
-    void testFormatVersion12_34_56_rc78() {
-        testFormatVersion("12.34.56-rc78", [12,34,56,"rc78"]);
+    def "formatVersion"(input, expected) {
+        expect:
+        def actual = SemverGitPlugin.formatVersion(input)
+        expected == actual
+
+        where:
+        input               || expected
+        [1,0,0,null]        || "1.0.0"
+        [1,2,3,null]        || "1.2.3"
+        [1,2,3,"beta"]      || "1.2.3-beta"
+        [1,2,3,"SNAPSHOT"]  || "1.2.3-SNAPSHOT"
+        [12,34,56,"rc78"]   || "12.34.56-rc78"
     }
 
-    void testNextVersion(expVersion, version, nextVersion, snapshotSuffix) {
-        assertEquals(expVersion, SemverGitPlugin.getNextVersion(version, nextVersion, snapshotSuffix));
+    def "testFail"(String input) {
+        when:
+        SemverGitPlugin.parseVersion(input)
+
+        then:
+        thrown(IllegalArgumentException)
+
+        where:
+        input << ["a.b.c", "1", "a1.2.3", "1.2.3a"]
     }
-    void testNextPatchVersion123() {
-        testNextVersion("1.2.4-SNAPSHOT", "1.2.3", "patch", "SNAPSHOT");
+
+    def "testNextVersion"(String expected, String version, String nextVersion) {
+        expect:
+        def actual = SemverGitPlugin.getNextVersion(version, nextVersion, "SNAPSHOT")
+        expected == actual
+
+        where:
+        version      | nextVersion  || expected
+        "1.2.3"      | "patch"      || "1.2.4-SNAPSHOT"
+        "1.2.3-beta" | "patch"      || "1.2.3-SNAPSHOT"
+        "1.2.3"      | "minor"      || "1.3.0-SNAPSHOT"
+        "1.2.3-beta" | "minor"      || "1.2.3-SNAPSHOT"
+        "1.2.0-beta" | "minor"      || "1.2.0-SNAPSHOT"
+        "1.2.3"      | "major"      || "2.0.0-SNAPSHOT"
+        "1.2.3-beta" | "major"      || "1.2.3-SNAPSHOT"
+        "1.0.0-beta" | "major"      || "1.0.0-SNAPSHOT"
     }
-    void testNextPatchVersion123beta() {
-        testNextVersion("1.2.3-SNAPSHOT", "1.2.3-beta", "patch", "SNAPSHOT");
-    }
-    void testNextMinorVersion123() {
-        testNextVersion("1.3.0-SNAPSHOT", "1.2.3", "minor", "SNAPSHOT");
-    }
-    void testNextMinorVersion123beta() {
-        testNextVersion("1.2.3-SNAPSHOT", "1.2.3-beta", "minor", "SNAPSHOT");
-    }
-    void testNextMinorVersion120beta() {
-        testNextVersion("1.2.0-SNAPSHOT", "1.2.0-beta", "minor", "SNAPSHOT");
-    }
-    void testNextMajorVersion123() {
-        testNextVersion("2.0.0-SNAPSHOT", "1.2.3", "major", "SNAPSHOT");
-    }
-    void testNextMajorVersion123beta() {
-        testNextVersion("1.2.3-SNAPSHOT", "1.2.3-beta", "major", "SNAPSHOT");
-    }
-    void testNextMajorVersion100beta() {
-        testNextVersion("1.0.0-SNAPSHOT", "1.0.0-beta", "major", "SNAPSHOT");
-    }
-    void testNextPatchVersionPrefix123() {
-        testNextVersion("1.2.4-SNAPSHOT", "prefix-1.2.3", "patch", "SNAPSHOT");
-    }
-    void testNextPatchVersionV123() {
-        testNextVersion("1.2.4-SNAPSHOT", "v1.2.3", "patch", "SNAPSHOT");
-    }
+
 }
