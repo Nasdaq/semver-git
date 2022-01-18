@@ -30,7 +30,7 @@ import spock.lang.Specification
 class SemverGitPluginTest extends Specification {
     def "parseVersion"(String input, expected) {
         expect:
-        def actual = SemverGitPlugin.parseVersion(input)
+        def actual = SemverGitPlugin.parseVersion(input, null)
         expected == actual
 
         where:
@@ -40,7 +40,20 @@ class SemverGitPluginTest extends Specification {
         "1.2.3-beta"    || [1,2,3,"beta"]
         "1.2.3-SNAPSHOT"|| [1,2,3,"SNAPSHOT"]
         "12.34.56-rc78" || [12,34,56,"rc78"]
-        "v1.2.3"         || [1,2,3,null]
+    }
+
+    def "parseVersion prefixed"(String input, prefix, expected) {
+        expect:
+        def actual = SemverGitPlugin.parseVersion(input, prefix)
+        expected == actual
+
+        where:
+        input            | prefix || expected
+        "v1.0.0"         |  'v'   || [1,0,0,null]
+        "v1.2.3"         |  'v'   || [1,2,3,null]
+        "v1.2.3-beta"    |  'v'   || [1,2,3,"beta"]
+        "v1.2.3-SNAPSHOT"|  'v'   || [1,2,3,"SNAPSHOT"]
+        "v12.34.56-rc78" |  'v'   || [12,34,56,"rc78"]
     }
 
     def "formatVersion"(input, expected) {
@@ -59,7 +72,7 @@ class SemverGitPluginTest extends Specification {
 
     def "testFail"(String input) {
         when:
-        SemverGitPlugin.parseVersion(input)
+        SemverGitPlugin.parseVersion(input, null)
 
         then:
         thrown(IllegalArgumentException)
@@ -70,7 +83,7 @@ class SemverGitPluginTest extends Specification {
 
     def "testNextVersion"(String expected, String version, String nextVersion) {
         expect:
-        def actual = SemverGitPlugin.getNextVersion(version, nextVersion, "SNAPSHOT")
+        def actual = SemverGitPlugin.getNextVersion(version, nextVersion, null, "SNAPSHOT")
         expected == actual
 
         where:

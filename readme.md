@@ -2,27 +2,23 @@
 [![Build Status](https://travis-ci.org/cinnober/semver-git.svg?branch=master)](https://travis-ci.org/cinnober/semver-git)
 
 The gradle plugin 'semver-git' sets the `project.version` based on _annotated_ git tags.
-Version numbers must follow [Semantic Versioning 2.0.0](http://semver.org/spec/v2.0.0.html), with the syntax _major.minor.patch_. Git tag can have a prefix but it will be removed in the output.
+Version numbers must follow [Semantic Versioning 2.0.0](http://semver.org/spec/v2.0.0.html), with the syntax _major.minor.patch_.
 
 ## Usage ##
 
 In your `build.gradle` file:
 
-    buildscript {
-        repositories {
-            mavenCentral()
-        }
-        dependencies {
-            classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.2.0'
-        }
+    plugins {
+        id "com.cinnober.gradle.semver-git" version "2.2.0" apply false
     }
     // optionally: ext.nextVersion = "major", "minor" (default), "patch" or e.g. "3.0.0-rc2"
     // optionally: ext.snapshotSuffix = "SNAPSHOT" (default) or a pattern, e.g. "<count>.g<sha><dirty>-SNAPSHOT"
     // optionally: ext.dirtyMarker = "-dirty" (default) replaces <dirty> in snapshotSuffix
     // optionally: ext.gitDescribeArgs = '--match *[0-9].[0-9]*.[0-9]*' (default) or other arguments for git describe.
+    // optionally: ext.semverPrefix = 'v' if your tags are named like v3.0.0
     apply plugin: 'com.cinnober.gradle.semver-git'
     
-Note: Use this method instead of the newer `plugins` method if you want to change `nextVersion` and `snapshotSuffix`.
+Note: Use `apply false` combined with a manual apply if you want to change `nextVersion` and `snapshotSuffix`.
 
 Then everything should just work. To create a release, create an
 annotated git tag, e.g.:
