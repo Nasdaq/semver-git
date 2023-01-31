@@ -24,8 +24,8 @@
 
 package com.cinnober.gradle.semver_git
 
-import org.gradle.api.Project
 import org.gradle.api.Plugin
+import org.gradle.api.Project
 import org.gradle.api.provider.Property
 
 interface SemverGitPluginExtension {
@@ -95,6 +95,38 @@ interface SemverGitPluginExtension {
      * </p>
      */
     Property<String> getPrefix()
+}
+
+class DeferredVersion {
+    private final Project project;
+    private final SemverGitPluginExtension extension;
+    private String version = null;
+
+    DeferredVersion(Project project, SemverGitPluginExtension extension) {
+        this.project = project;
+        this.extension = extension;
+    }
+
+    private synchronized String evaluate() {
+        if (version == null) {
+            version = SemverGitPlugin.getGitVersion(
+              this.extension.nextVersion.getOrNull(),
+              this.extension.snapshotSuffix.getOrNull(),
+              this.extension.dirtyMarker.getOrNull(),
+              this.extension.gitDescribeArgs.getOrNull(),
+              this.extension.prefix.getOrNull(),
+              this.project.projectDir
+            )
+        }
+        return version;
+    }
+
+    @Override
+    // Gradle uses the toString() of the version object,
+    // see: https://docs.gradle.org/current/javadoc/org/gradle/api/Project.html#getVersion--
+    public String toString() {
+        return evaluate();
+    }
 }
 
 class SemverGitPlugin implements Plugin<Project> {
@@ -184,11 +216,11 @@ class SemverGitPlugin implements Plugin<Project> {
 
     void apply(Project project) {
         def extension = project.extensions.create("semverGit", SemverGitPluginExtension)
-        extension.nextVersion.convention("minor")
-        extension.snapshotSuffix.convention("SNAPSHOT")
-        extension.dirtyMarker.convention("-dirty")
-        extension.gitDescribeArgs.convention('--match *[0-9].[0-9]*.[0-9]*')
-        extension.prefix.convention(null)
+        extension.nextVersion.convention("minor").finalizeValueOnRead()
+        extension.snapshotSuffix.convention("SNAPSHOT").finalizeValueOnRead()
+        extension.dirtyMarker.convention("-dirty").finalizeValueOnRead()
+        extension.gitDescribeArgs.convention('--match *[0-9].[0-9]*.[0-9]*').finalizeValueOnRead()
+        extension.prefix.convention(null).finalizeValueOnRead()
 
         if (project.ext.properties.containsKey("nextVersion")) {
             extension.nextVersion.set(project.ext.nextVersion)
@@ -205,14 +237,9 @@ class SemverGitPlugin implements Plugin<Project> {
         if (project.ext.properties.containsKey("semverPrefix")) {
             extension.prefix.set(project.ext.semverPrefix)
         }
-        project.version = getGitVersion(
-          extension.nextVersion.getOrNull(),
-          extension.snapshotSuffix.getOrNull(),
-          extension.dirtyMarker.getOrNull(),
-          extension.gitDescribeArgs.getOrNull(),
-          extension.prefix.getOrNull(),
-          project.projectDir
-        )
+
+        project.version = new DeferredVersion(project, extension)
+
         project.tasks.register('showVersion') {
             group = 'Help'
             description = 'Show the project version'

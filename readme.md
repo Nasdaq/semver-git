@@ -9,16 +9,17 @@ Version numbers must follow [Semantic Versioning 2.0.0](http://semver.org/spec/v
 In your `build.gradle` file:
 
     plugins {
-        id "com.cinnober.gradle.semver-git" version "2.2.0" apply false
+        id "com.cinnober.gradle.semver-git" version "3.1.0"
     }
-    // optionally: ext.nextVersion = "major", "minor" (default), "patch" or e.g. "3.0.0-rc2"
-    // optionally: ext.snapshotSuffix = "SNAPSHOT" (default) or a pattern, e.g. "<count>.g<sha><dirty>-SNAPSHOT"
-    // optionally: ext.dirtyMarker = "-dirty" (default) replaces <dirty> in snapshotSuffix
-    // optionally: ext.gitDescribeArgs = '--match *[0-9].[0-9]*.[0-9]*' (default) or other arguments for git describe.
-    // optionally: ext.semverPrefix = 'v' if your tags are named like v3.0.0
-    apply plugin: 'com.cinnober.gradle.semver-git'
-    
-Note: Use `apply false` combined with a manual apply if you want to change `nextVersion` and `snapshotSuffix`.
+
+    semverGit {
+        // All of the following are optional:
+        nextVersion = "major", "minor" (default), "patch" or e.g. "3.0.0-rc2"
+        snapshotSuffix = "SNAPSHOT" (default) or a pattern, e.g. "<count>.g<sha><dirty>-SNAPSHOT"
+        dirtyMarker = "-dirty" (default) replaces <dirty> in snapshotSuffix
+        gitDescribeArgs = '--match *[0-9].[0-9]*.[0-9]*' (default) or other arguments for git describe.
+        prefix = 'v' if your tags are named like v3.0.0
+    }
 
 Then everything should just work. To create a release, create an
 annotated git tag, e.g.:
@@ -40,6 +41,29 @@ version `1.1.0-5.g5242341`, i.e. a non-snapshot pre-release.
 For example the snapshot suffix pattern is `<count>.g<sha>-SNAPSHOT`
 which will generate the version `1.1.0-5.g5242341-SNAPSHOT`, which is
 a unique snapshot version.
+
+
+### Legacy config ###
+
+Plugin versions 3.0.0 and earlier used a different config method,
+which required setting the configuration before applying the plugin:
+
+    plugins {
+        id "com.cinnober.gradle.semver-git" version "2.2.0" apply false
+    }
+    // optionally: ext.nextVersion = "major", "minor" (default), "patch" or e.g. "3.0.0-rc2"
+    // optionally: ext.snapshotSuffix = "SNAPSHOT" (default) or a pattern, e.g. "<count>.g<sha><dirty>-SNAPSHOT"
+    // optionally: ext.dirtyMarker = "-dirty" (default) replaces <dirty> in snapshotSuffix
+    // optionally: ext.gitDescribeArgs = '--match *[0-9].[0-9]*.[0-9]*' (default) or other arguments for git describe.
+    // optionally: ext.semverPrefix = 'v' if your tags are named like v3.0.0
+    apply plugin: 'com.cinnober.gradle.semver-git'
+
+Note: This configuration method requires `apply false` combined with a manual apply.
+
+Both legacy config and the newer `semverGit {}` config block may be
+used simultaneously. Any non-null setting defined using both methods
+will use the value from the `semverGit {}` block.
+
 
 ### Release ###
 
