@@ -26,6 +26,76 @@ package com.cinnober.gradle.semver_git
 
 import org.gradle.api.Project
 import org.gradle.api.Plugin
+import org.gradle.api.provider.Property
+
+interface SemverGitPluginExtension {
+    /**
+     * One of <code>"minor"</code> (default) or <code>"major"</code> to bump the respective SemVer part,
+     * or a literal value such as <code>"3.0.0-rc2"</code> to use as the next version.
+     */
+    Property<String> getNextVersion()
+
+    /**
+     * Pattern for the suffix to append when the current commit is not version tagged.
+     *
+     * <p>
+     * Example: <code>"&lt;count&gt;.g&lt;sha&gt;&lt;dirty&gt;-SNAPSHOT"</code>.
+     * </p>
+     *
+     * <p>
+     * Pattern may include the following placeholders:
+     * </p>
+     *
+     * <ul>
+     *   <li><code>&lt;count&gt;</code>: Number of commits (including this) since the last version tag.</li>
+     *   <li><code>&lt;sha&gt;</code>: Abbreviated ID of the current commit.</li>
+     *   <li><code>&lt;dirty&gt;</code>: The value of {@link #getDirtyMarker() dirtyMarker} if there are unstaged changes,
+     *   otherwise empty. Note that untracked files do not count.</li>
+     * </ul>
+     *
+     * <p>
+     * Default: <code>"SNAPSHOT"</code>
+     * </p>
+     */
+    Property<String> getSnapshotSuffix()
+
+    /**
+     * The value to substitute for <code>&lt;dirty&gt;</code> in {@link #getSnapshotSuffix() snapshotSuffix}
+     * if there are unstaged changes.
+     *
+     * <p>
+     * Note that this has no effect if {@link #getSnapshotSuffix() snapshotSuffix}
+     * does not include a <code>&lt;dirty&gt;</code> placeholder.
+     * </p>
+     *
+     * <p>
+     * Default: <code>"-dirty"</code>
+     * </p>
+     */
+    Property<String> getDirtyMarker()
+
+    /**
+     * Additional arguments for the <code>git describe</code> subprocess.
+     *
+     * <p>
+     * Default: <code>"--match *[0-9].[0-9]*.[0-9]*"</code>
+     * </p>
+     */
+    Property<String> getGitDescribeArgs()
+
+    /**
+     * A prefix that may be stripped from tag names to create a version number.
+     *
+     * <p>
+     * For example: if your tags are named like <code>v3.0.0</code>, set this to <code>"v"</code>.
+     * </p>
+     *
+     * <p>
+     * Default: null
+     * </p>
+     */
+    Property<String> getPrefix()
+}
 
 class SemverGitPlugin implements Plugin<Project> {
 
@@ -113,27 +183,36 @@ class SemverGitPlugin implements Plugin<Project> {
     }
 
     void apply(Project project) {
-        def nextVersion = "minor"
-        def snapshotSuffix = "SNAPSHOT"
-        def dirtyMarker = "-dirty"
-        def gitDescribeArgs = '--match *[0-9].[0-9]*.[0-9]*'
-        String semverPrefix = null
+        def extension = project.extensions.create("semverGit", SemverGitPluginExtension)
+        extension.nextVersion.convention("minor")
+        extension.snapshotSuffix.convention("SNAPSHOT")
+        extension.dirtyMarker.convention("-dirty")
+        extension.gitDescribeArgs.convention('--match *[0-9].[0-9]*.[0-9]*')
+        extension.prefix.convention(null)
+
         if (project.ext.properties.containsKey("nextVersion")) {
-            nextVersion = project.ext.nextVersion
+            extension.nextVersion.set(project.ext.nextVersion)
         }
         if (project.ext.properties.containsKey("snapshotSuffix")) {
-            snapshotSuffix = project.ext.snapshotSuffix
+            extension.snapshotSuffix.set(project.ext.snapshotSuffix)
         }
         if (project.ext.properties.containsKey("gitDescribeArgs")) {
-            gitDescribeArgs = project.ext.gitDescribeArgs
+            extension.gitDescribeArgs.set(project.ext.gitDescribeArgs)
         }
         if (project.ext.properties.containsKey("dirtyMarker")) {
-            dirtyMarker = project.ext.dirtyMarker
+            extension.dirtyMarker.set(project.ext.dirtyMarker)
         }
         if (project.ext.properties.containsKey("semverPrefix")) {
-            semverPrefix = project.ext.semverPrefix
+            extension.prefix.set(project.ext.semverPrefix)
         }
-        project.version = getGitVersion(nextVersion, snapshotSuffix, dirtyMarker, gitDescribeArgs, semverPrefix, project.projectDir)
+        project.version = getGitVersion(
+          extension.nextVersion.getOrNull(),
+          extension.snapshotSuffix.getOrNull(),
+          extension.dirtyMarker.getOrNull(),
+          extension.gitDescribeArgs.getOrNull(),
+          extension.prefix.getOrNull(),
+          project.projectDir
+        )
         project.tasks.register('showVersion') {
             group = 'Help'
             description = 'Show the project version'
