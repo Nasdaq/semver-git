@@ -2,7 +2,6 @@ package com.cinnober.gradle.semver_git
 
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
-import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.TempDir
@@ -10,7 +9,6 @@ import spock.lang.TempDir
 import java.nio.file.Files
 import java.nio.file.Path
 
-@Ignore
 class SemverGitPluginFunctionalTest extends Specification {
     @Shared
     Boolean slowIo = false
@@ -85,11 +83,13 @@ class SemverGitPluginFunctionalTest extends Specification {
     }
 
     def git(String argument) {
-        return ("git " + argument).execute(null, projectDir)
+        def proc = ("git " + argument).execute(null, projectDir)
+        proc.waitFor()
+        return proc
     }
 
     def init() {
-        return git("init")
+        git("init")
     }
 
     def commit() {
