@@ -90,6 +90,10 @@ class SemverGitPluginFunctionalTest extends Specification {
 
     def init() {
         git("init")
+
+        // Disable GPG signing in the test directory, otherwise user might be prompted for
+        // manual intervention if they have this config set to true
+        return git("config commit.gpgSign false")
     }
 
     def commit() {
