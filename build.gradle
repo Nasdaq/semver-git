@@ -41,9 +41,6 @@ group = 'com.cinnober.gradle'
 
 test {
   useJUnitPlatform()
-  retry {
-    maxRetries = 5
-  }
 }
 
 // -- Maven Central --
