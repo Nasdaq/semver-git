@@ -98,12 +98,12 @@ interface SemverGitPluginExtension {
 }
 
 class DeferredVersion {
-    private final Project project;
+    private final File projectDir;
     private final SemverGitPluginExtension extension;
     private String version = null;
 
-    DeferredVersion(Project project, SemverGitPluginExtension extension) {
-        this.project = project;
+    DeferredVersion(File projectDir, SemverGitPluginExtension extension) {
+        this.projectDir = projectDir;
         this.extension = extension;
     }
 
@@ -115,7 +115,7 @@ class DeferredVersion {
               this.extension.dirtyMarker.getOrNull(),
               this.extension.gitDescribeArgs.getOrNull(),
               this.extension.prefix.getOrNull(),
-              this.project.projectDir
+              this.projectDir
             )
         }
         return version;
@@ -238,7 +238,7 @@ class SemverGitPlugin implements Plugin<Project> {
             extension.prefix.set(project.ext.semverPrefix)
         }
 
-        project.version = new DeferredVersion(project, extension)
+        project.version = new DeferredVersion(project.projectDir, extension)
 
         project.tasks.register('showVersion') {
             group = 'Help'
